@@ -53,10 +53,10 @@ public class SipgateContactSyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        Log.d("SipgateContactSyncAdapter", "onPerformSync()");
+        Log.d("SipgateContactSyncAdapt", "onPerformSync()");
         AccountManager accountManager = AccountManager.get(getContext());
         final String jwt = accountManager.peekAuthToken(account, "JWT");
-        Log.d("SipgateContactSyncAdapter", jwt);
+        Log.d("SipgateContactSyncAdapt", jwt);
         final JSONArray users = SipgateApi.getUsers(jwt);
         assert users != null;
 
@@ -80,7 +80,7 @@ public class SipgateContactSyncAdapter extends AbstractThreadedSyncAdapter {
                     continue;
                 }
                 final String firstname = user.getString("firstname");
-                Log.d("SipgateContactSyncAdapter", String.format("adding id: %s %s", id, firstname));
+                Log.d("SipgateContactSyncAdapt", String.format("adding id: %s %s", id, firstname));
                 ContactManager.addContact(
                         id,
                         firstname,

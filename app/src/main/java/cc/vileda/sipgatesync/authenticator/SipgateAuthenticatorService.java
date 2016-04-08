@@ -1,4 +1,4 @@
-package cc.vileda.sipgatesync.sipgatesync.authenticator;
+package cc.vileda.sipgatesync.authenticator;
 
 import android.app.Service;
 import android.content.Intent;

@@ -19,11 +19,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".SipgateLoginActivity"
+            android:name="cc.vileda.sipgatesync.authenticator.SipgateLoginActivity"
             android:label="@string/app_name" />
 
         <service
-            android:name=".authenticator.SipgateAuthenticatorService"
+            android:name="cc.vileda.sipgatesync.authenticator.SipgateAuthenticatorService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -35,7 +35,7 @@
                 android:resource="@xml/authenticator" />
         </service>
         <service
-            android:name=".contacts.SipgateContactSyncService"
+            android:name="cc.vileda.sipgatesync.contacts.SipgateContactSyncService"
             android:exported="true"
             android:process=":sync">
             <intent-filter>

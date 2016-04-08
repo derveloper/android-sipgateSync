@@ -1,4 +1,4 @@
-package cc.vileda.sipgatesync.sipgatesync.contacts;
+package cc.vileda.sipgatesync.contacts;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;

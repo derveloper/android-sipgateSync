@@ -1,4 +1,4 @@
-package cc.vileda.sipgatesync.sipgatesync.authenticator;
+package cc.vileda.sipgatesync.authenticator;
 
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
@@ -11,8 +11,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
-import cc.vileda.sipgatesync.sipgatesync.SipgateLoginActivity;
-import cc.vileda.sipgatesync.sipgatesync.api.SipgateApi;
+import cc.vileda.sipgatesync.api.SipgateApi;
 
 /**
  * Created by vileda on 08.04.16.

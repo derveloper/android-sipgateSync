@@ -1,4 +1,4 @@
-package cc.vileda.sipgatesync.sipgatesync.contacts;
+package cc.vileda.sipgatesync.contacts;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -17,12 +17,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import cc.vileda.sipgatesync.sipgatesync.api.SipgateApi;
+import cc.vileda.sipgatesync.api.SipgateApi;
 
 /**
  * Created by vileda on 08.04.16.

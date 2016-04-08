@@ -1,4 +1,4 @@
-package cc.vileda.sipgatesync.sipgatesync.api;
+package cc.vileda.sipgatesync.api;
 
 import android.util.Log;
 

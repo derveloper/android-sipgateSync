@@ -27,25 +27,25 @@ import cc.vileda.sipgatesync.sipgatesync.api.SipgateApi;
 /**
  * Created by vileda on 08.04.16.
  */
-public class ContactSyncAdapter extends AbstractThreadedSyncAdapter {
+public class SipgateContactSyncAdapter extends AbstractThreadedSyncAdapter {
     final ContentResolver mContentResolver;
 
-    public ContactSyncAdapter(Context context, boolean autoInitialize) {
+    public SipgateContactSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
         mContentResolver = context.getContentResolver();
     }
 
-    public ContactSyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
+    public SipgateContactSyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
         super(context, autoInitialize, allowParallelSyncs);
         mContentResolver = context.getContentResolver();
     }
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        Log.d("ContactSyncAdapter", "onPerformSync()");
+        Log.d("SipgateContactSyncAdapter", "onPerformSync()");
         AccountManager accountManager = AccountManager.get(getContext());
         final String jwt = accountManager.peekAuthToken(account, "JWT");
-        Log.d("ContactSyncAdapter", jwt);
+        Log.d("SipgateContactSyncAdapter", jwt);
         final JSONArray users = SipgateApi.getUsers(jwt);
         assert users != null;
 
@@ -69,7 +69,7 @@ public class ContactSyncAdapter extends AbstractThreadedSyncAdapter {
                     continue;
                 }
                 final String firstname = user.getString("firstname");
-                Log.d("ContactSyncAdapter", String.format("adding id: %s %s", id, firstname));
+                Log.d("SipgateContactSyncAdapter", String.format("adding id: %s %s", id, firstname));
                 ContactManager.addContact(
                         id,
                         firstname,

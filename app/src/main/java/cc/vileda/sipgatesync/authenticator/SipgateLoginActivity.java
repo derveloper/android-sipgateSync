@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 vileda
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package cc.vileda.sipgatesync.authenticator;
 
 import android.accounts.Account;
@@ -40,9 +56,6 @@ import cc.vileda.sipgatesync.sipgatesync.R;
 import static android.Manifest.permission.READ_CONTACTS;
 import static android.Manifest.permission.WRITE_CONTACTS;
 
-/**
- * A login screen that offers login via email/password.
- */
 public class SipgateLoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
     private static final int REQUEST_READ_CONTACTS = 0;
     private static final int REQUEST_WRITE_CONTACTS = 1;

@@ -46,19 +46,11 @@ import static android.Manifest.permission.WRITE_CONTACTS;
  * A login screen that offers login via email/password.
  */
 public class SipgateLoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
-
-    /**
-     * Id to identity READ_CONTACTS permission request.
-     */
     private static final int REQUEST_READ_CONTACTS = 0;
     private static final int REQUEST_WRITE_CONTACTS = 1;
 
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
     private UserLoginTask mAuthTask = null;
 
-    // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
@@ -68,7 +60,7 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sipgate_login);
-        // Set up the login form.
+
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
         mayWriteContacts();
@@ -221,23 +213,15 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() > 7;
     }
 
-    /**
-     * Shows the progress UI and hides the login form.
-     */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
@@ -259,8 +243,6 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
                 }
             });
         } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
@@ -301,7 +283,6 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
     }
 
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(SipgateLoginActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
@@ -317,13 +298,8 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
         };
 
         int ADDRESS = 0;
-        int IS_PRIMARY = 1;
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
         private static final String TAG = "UserLoginTask";
@@ -337,8 +313,6 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
             final String token = SipgateApi.getToken(mEmail, mPassword);
 
             if(token == null) return false;
@@ -351,7 +325,7 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
             if(success) {
                 accountManager.setAuthToken(account, "JWT", token);
                 Log.d(TAG,"Account created");
-            }else{
+            } else {
                 Log.d(TAG,"Account creation failed. Look at previous logs to investigate");
             }
 

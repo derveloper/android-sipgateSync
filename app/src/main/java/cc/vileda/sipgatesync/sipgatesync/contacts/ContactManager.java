@@ -6,9 +6,6 @@ import android.provider.ContactsContract;
 
 import java.util.ArrayList;
 
-/**
- * Created by vileda on 08.04.16.
- */
 public final class ContactManager {
     public static void addContact(final String id, final String firstName, final String secondName, final String email, final ContentResolver resolver, String accountName) {
         ArrayList<ContentProviderOperation> operationList = new ArrayList<>();

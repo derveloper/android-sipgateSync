@@ -348,6 +348,8 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
 
             final String token = SipgateApi.getToken(mEmail, mPassword);
 
+            if(token == null) return false;
+
             for (String credential : DUMMY_CREDENTIALS) {
                 String[] pieces = credential.split(":");
                 if (pieces[0].equals(mEmail)) {

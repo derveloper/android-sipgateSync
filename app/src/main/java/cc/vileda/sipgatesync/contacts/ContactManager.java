@@ -21,9 +21,19 @@ import android.content.ContentResolver;
 import android.provider.ContactsContract;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public final class ContactManager {
-    public static void addContact(final String id, final String firstName, final String secondName, final String email, final ContentResolver resolver, String accountName) {
+    public static void addContact(
+            final String id,
+            final String firstName,
+            final String secondName,
+            final List<String> emails,
+            final List<String> mobileNumbers,
+            final List<String> landlineNumbers,
+            final List<String> faxNumbers,
+            final ContentResolver resolver,
+            final String accountName) {
         ArrayList<ContentProviderOperation> operationList = new ArrayList<>();
         operationList.add(ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
                 .withValue(ContactsContract.RawContacts.SOURCE_ID, id)
@@ -39,12 +49,45 @@ public final class ContactManager {
                 .withValue(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME, secondName)
                 .build());
 
-        operationList.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                .withValueBackReference(ContactsContract.RawContacts.Data.RAW_CONTACT_ID, 0)
-                .withValue(ContactsContract.Data.MIMETYPE,ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
-                .withValue(ContactsContract.CommonDataKinds.Email.DATA, email)
-                .withValue(ContactsContract.CommonDataKinds.Email.TYPE, ContactsContract.CommonDataKinds.Email.TYPE_WORK)
-                .build());
+        // emails
+        for (final String email : emails) {
+            operationList.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                    .withValueBackReference(ContactsContract.RawContacts.Data.RAW_CONTACT_ID, 0)
+                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+                    .withValue(ContactsContract.CommonDataKinds.Email.DATA, email)
+                    .withValue(ContactsContract.CommonDataKinds.Email.TYPE, ContactsContract.CommonDataKinds.Email.TYPE_WORK)
+                    .build());
+        }
+
+        // mobile numbers
+        for (final String mobileNumber : mobileNumbers) {
+            operationList.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                    .withValueBackReference(ContactsContract.RawContacts.Data.RAW_CONTACT_ID, 0)
+                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                    .withValue(ContactsContract.CommonDataKinds.Phone.DATA, "+" + mobileNumber)
+                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
+                    .build());
+        }
+
+        // landline numbers
+        for (final String landlineNumber : landlineNumbers) {
+            operationList.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                    .withValueBackReference(ContactsContract.RawContacts.Data.RAW_CONTACT_ID, 0)
+                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                    .withValue(ContactsContract.CommonDataKinds.Phone.DATA, "+" + landlineNumber)
+                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MAIN)
+                    .build());
+        }
+
+        // fax numbers
+        for (final String faxNumber : faxNumbers) {
+            operationList.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                    .withValueBackReference(ContactsContract.RawContacts.Data.RAW_CONTACT_ID, 0)
+                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                    .withValue(ContactsContract.CommonDataKinds.Phone.DATA, "+" + faxNumber)
+                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_FAX_WORK)
+                    .build());
+        }
 
         try{
             resolver.applyBatch(ContactsContract.AUTHORITY, operationList);

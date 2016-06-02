@@ -42,7 +42,7 @@ public final class SipgateApi {
             request.put("username", username);
             request.put("password", password);
             OutputStreamWriter wr = new OutputStreamWriter(urlConnection.getOutputStream());
-            Log.d("SipgateApi", request.toString());
+            Log.d("SipgateApi", request.getString("username"));
             wr.write(request.toString());
             wr.flush();
             StringBuilder sb = new StringBuilder();
@@ -68,9 +68,9 @@ public final class SipgateApi {
         return null;
     }
 
-    public static JSONArray getUsers(final String token) {
+    public static JSONArray getContacts(final String token) {
         try {
-            return new JSONObject(getUrl("/users", token))
+            return new JSONObject(getUrl("/contacts", token))
                     .getJSONArray("items");
         } catch (Exception e) {
             e.printStackTrace();

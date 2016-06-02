@@ -33,7 +33,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import cc.vileda.sipgatesync.api.SipgateApi;
@@ -56,9 +58,11 @@ public class SipgateContactSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d("SipgateContactSyncAdapt", "onPerformSync()");
         AccountManager accountManager = AccountManager.get(getContext());
         final String jwt = accountManager.peekAuthToken(account, "JWT");
-        Log.d("SipgateContactSyncAdapt", jwt);
-        final JSONArray users = SipgateApi.getUsers(jwt);
+        Log.d("SipgateContactSyncAdapt", jwt == null ? "NO JWT!" : jwt);
+        final JSONArray users = SipgateApi.getContacts(jwt);
         assert users != null;
+
+        Log.d("SipgateContactSyncAdapt", String.format("fetched %d contacts", users.length()));
 
         Uri rawContactUri = ContactsContract.RawContacts.CONTENT_URI
                 .buildUpon()
@@ -67,25 +71,36 @@ public class SipgateContactSyncAdapter extends AbstractThreadedSyncAdapter {
                 .build();
         Cursor c1 = mContentResolver.query(rawContactUri, null, null, null, null);
         Map<String, Boolean> localContacts = new HashMap<>();
-        while (c1.moveToNext()) {
-            localContacts.put(c1.getString(c1.getColumnIndex(ContactsContract.RawContacts.SOURCE_ID)), false);
+        while (c1 != null && c1.moveToNext()) {
+            localContacts
+                    .put(c1.getString(c1.getColumnIndex(ContactsContract.RawContacts.SOURCE_ID)), false);
         }
 
         for (int i = 0; i < users.length(); i++) {
             try {
                 final JSONObject user = users.getJSONObject(i);
-                final String id = user.getString("id");
+                final String id = user.getString("uuid");
                 if(localContacts.containsKey(id)) {
                     localContacts.put(id, true);
                     continue;
                 }
                 final String firstname = user.getString("firstname");
+
+                final JSONArray emails = user.getJSONArray("emails");
+                final JSONArray mobile = user.getJSONArray("mobile");
+                final JSONArray landline = user.getJSONArray("landline");
+                final JSONArray fax = user.getJSONArray("fax");
+
                 Log.d("SipgateContactSyncAdapt", String.format("adding id: %s %s", id, firstname));
+
                 ContactManager.addContact(
                         id,
                         firstname,
                         user.getString("lastname"),
-                        user.getString("email"),
+                        jsonArrayToList(emails),
+                        jsonArrayToList(mobile),
+                        jsonArrayToList(landline),
+                        jsonArrayToList(fax),
                         mContentResolver,
                         account.name
                 );
@@ -99,5 +114,14 @@ public class SipgateContactSyncAdapter extends AbstractThreadedSyncAdapter {
                 ContactManager.deleteContact(contact.getKey(), mContentResolver, account.name);
             }
         }
+    }
+
+    private List<String> jsonArrayToList(final JSONArray arr) throws JSONException {
+        final List<String> list = new ArrayList<>();
+        for (int i = 0; i < arr.length(); i++) {
+            list.add(arr.getString(i));
+        }
+
+        return list;
     }
 }

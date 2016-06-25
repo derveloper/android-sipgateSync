@@ -164,8 +164,7 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
         }
         else {
             OAuth oAuth = OAuth.newInstance(getApplicationContext(),
-                getFragmentManager(),
-                new ClientParametersAuthentication("2vqjBrGtjA", "RRHlNeDGdzGeEmFvKOwUCzwe8yXXWGVbDLQ80yV8ISj0jWIWsx"),
+                getFragmentManager(), new ClientParametersAuthentication(getString(R.string.client_id), getString(R.string.client_secret)),
                 "https://api.sipgate.com/v1/authorization/oauth/authorize",
                 "https://api.sipgate.com/v1/authorization/oauth/token",
                 "http://localhost/Callback", Collections.singletonList("contacts:read"));

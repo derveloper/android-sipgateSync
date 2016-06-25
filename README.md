@@ -1,6 +1,10 @@
 # android-sipgateSync
 sync your sipgate contacts to your android phone
 
+# download
+
+Download the [apk](https://github.com/vileda/android-sipgateSync/raw/master/sipgateSync.apk)
+
 # license
 
 Copyright 2016 vileda

@@ -16,18 +16,14 @@
 
 package cc.vileda.sipgatesync.authenticator;
 
-import android.accounts.AbstractAccountAuthenticator;
-import android.accounts.Account;
-import android.accounts.AccountAuthenticatorResponse;
-import android.accounts.AccountManager;
-import android.accounts.NetworkErrorException;
+import android.accounts.*;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-
 import cc.vileda.sipgatesync.api.SipgateApi;
+
 
 public class SipgateAuthenticator extends AbstractAccountAuthenticator {
     private final Context context;
@@ -44,7 +40,8 @@ public class SipgateAuthenticator extends AbstractAccountAuthenticator {
     }
 
     @Override
-    public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
+    public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options)
+        throws NetworkErrorException {
         Log.d("SipgateAuthenticator", "addAccount");
         final Intent intent = new Intent(context, SipgateLoginActivity.class);
         intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);

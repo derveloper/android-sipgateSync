@@ -18,7 +18,6 @@ package cc.vileda.sipgatesync.api;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -28,6 +27,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
 
 public final class SipgateApi {
     private static final String HTTPS_API_SIPGATE_COM_V1 = "https://api.sipgate.com/v1";
@@ -48,8 +48,7 @@ public final class SipgateApi {
             StringBuilder sb = new StringBuilder();
             int HttpResult = urlConnection.getResponseCode();
             if (HttpResult == HttpURLConnection.HTTP_OK) {
-                BufferedReader br = new BufferedReader(
-                        new InputStreamReader(urlConnection.getInputStream(), "utf-8"));
+                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "utf-8"));
                 String line;
                 while ((line = br.readLine()) != null) {
                     sb.append(line).append("\n");
@@ -58,21 +57,12 @@ public final class SipgateApi {
                 Log.d("SipgateApi", "" + sb.toString());
                 final JSONObject response = new JSONObject(sb.toString());
                 return response.getString("token");
-            } else {
+            }
+            else {
                 System.out.println(urlConnection.getResponseMessage());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-
-        return null;
-    }
-
-    public static JSONArray getContacts(final String token) {
-        try {
-            return new JSONObject(getUrl("/contacts", token))
-                    .getJSONArray("items");
-        } catch (Exception e) {
+        catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -80,8 +70,23 @@ public final class SipgateApi {
     }
 
     @NonNull
-    private static String getUrl(final String apiUrl) throws IOException {
-        return getUrl(apiUrl, null);
+    private static HttpURLConnection getConnection(String apiUrl) throws IOException {
+        final URL url = new URL(HTTPS_API_SIPGATE_COM_V1 + apiUrl);
+        final HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestProperty("Content-Type", "application/json");
+        urlConnection.setRequestProperty("Accept", "application/json");
+        return urlConnection;
+    }
+
+    public static JSONArray getContacts(final String token) {
+        try {
+            return new JSONObject(getUrl("/contacts", token)).getJSONArray("items");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     @NonNull
@@ -95,8 +100,7 @@ public final class SipgateApi {
         StringBuilder sb = new StringBuilder();
         int HttpResult = urlConnection.getResponseCode();
         if (HttpResult == HttpURLConnection.HTTP_OK) {
-            BufferedReader br = new BufferedReader(
-                    new InputStreamReader(urlConnection.getInputStream(), "utf-8"));
+            BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "utf-8"));
             String line;
             while ((line = br.readLine()) != null) {
                 sb.append(line).append("\n");
@@ -104,7 +108,8 @@ public final class SipgateApi {
             br.close();
 
             return sb.toString();
-        } else {
+        }
+        else {
             System.out.println(urlConnection.getResponseMessage());
         }
 
@@ -112,11 +117,7 @@ public final class SipgateApi {
     }
 
     @NonNull
-    private static HttpURLConnection getConnection(String apiUrl) throws IOException {
-        final URL url = new URL(HTTPS_API_SIPGATE_COM_V1 + apiUrl);
-        final HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestProperty("Content-Type", "application/json");
-        urlConnection.setRequestProperty("Accept", "application/json");
-        return urlConnection;
+    private static String getUrl(final String apiUrl) throws IOException {
+        return getUrl(apiUrl, null);
     }
 }

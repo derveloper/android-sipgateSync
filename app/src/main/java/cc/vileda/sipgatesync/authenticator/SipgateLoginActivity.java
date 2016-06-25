@@ -57,6 +57,7 @@ import java.util.List;
 import static android.Manifest.permission.READ_CONTACTS;
 import static android.Manifest.permission.WRITE_CONTACTS;
 
+
 public class SipgateLoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
     private static final int REQUEST_READ_CONTACTS = 0;
     private static final int REQUEST_WRITE_CONTACTS = 1;
@@ -116,15 +117,15 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
             return true;
         }
         if (shouldShowRequestPermissionRationale(WRITE_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{WRITE_CONTACTS}, REQUEST_WRITE_CONTACTS);
-                        }
-                    });
-        } else {
+            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE).setAction(android.R.string.ok, new View.OnClickListener() {
+                @Override
+                @TargetApi(Build.VERSION_CODES.M)
+                public void onClick(View v) {
+                    requestPermissions(new String[]{WRITE_CONTACTS}, REQUEST_WRITE_CONTACTS);
+                }
+            });
+        }
+        else {
             requestPermissions(new String[]{WRITE_CONTACTS}, REQUEST_WRITE_CONTACTS);
         }
         return false;
@@ -160,16 +161,14 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
             // There was an error; don't attempt login and focus the first
             // form field with an error.
             focusView.requestFocus();
-        } else {
-            OAuth oAuth = OAuth.newInstance(
-                getApplicationContext(),
+        }
+        else {
+            OAuth oAuth = OAuth.newInstance(getApplicationContext(),
                 getFragmentManager(),
                 new ClientParametersAuthentication("2vqjBrGtjA", "RRHlNeDGdzGeEmFvKOwUCzwe8yXXWGVbDLQ80yV8ISj0jWIWsx"),
                 "https://api.sipgate.com/v1/authorization/oauth/authorize",
                 "https://api.sipgate.com/v1/authorization/oauth/token",
-                "http://localhost/Callback",
-                Collections.singletonList("contacts:read")
-                                           );
+                "http://localhost/Callback", Collections.singletonList("contacts:read"));
 
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
@@ -187,14 +186,13 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
             return true;
         }
         if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
+            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE).setAction(android.R.string.ok, new View.OnClickListener() {
+                @Override
+                @TargetApi(Build.VERSION_CODES.M)
+                public void onClick(View v) {
+                    requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
+                }
+            });
         }
         else {
             requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
@@ -207,26 +205,47 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+            mLoginFormView.setVisibility(show
+                                         ? View.GONE
+                                         : View.VISIBLE);
+            mLoginFormView.animate()
+              .setDuration(shortAnimTime)
+              .alpha(show
+                     ? 0
+                     : 1)
+              .setListener(new AnimatorListenerAdapter() {
+                  @Override
+                  public void onAnimationEnd(Animator animation) {
+                      mLoginFormView.setVisibility(show
+                                                   ? View.GONE
+                                                   : View.VISIBLE);
+                  }
+              });
 
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mProgressView.setVisibility(show
+                                        ? View.VISIBLE
+                                        : View.GONE);
+            mProgressView.animate()
+              .setDuration(shortAnimTime)
+              .alpha(show
+                     ? 1
+                     : 0)
+              .setListener(new AnimatorListenerAdapter() {
+                  @Override
+                  public void onAnimationEnd(Animator animation) {
+                      mProgressView.setVisibility(show
+                                                  ? View.VISIBLE
+                                                  : View.GONE);
+                  }
+              });
+        }
+        else {
+            mProgressView.setVisibility(show
+                                        ? View.VISIBLE
+                                        : View.GONE);
+            mLoginFormView.setVisibility(show
+                                         ? View.GONE
+                                         : View.VISIBLE);
         }
     }
 
@@ -234,9 +253,8 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
      * Callback received when a permissions request has been completed.
      */
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults
-                                          ) {
+    public void onRequestPermissionsResult(
+      int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_READ_CONTACTS) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 populateAutoComplete();
@@ -252,18 +270,15 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         return new CursorLoader(this,
-                                // Retrieve data rows for the device user's 'profile' contact.
-                                Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
-                        ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
+          // Retrieve data rows for the device user's 'profile' contact.
+          Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI, ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
 
-                                // Select only accountName addresses.
-                                ContactsContract.Contacts.Data.MIMETYPE +
-                        " = ?", new String[]{ContactsContract.CommonDataKinds.Email
-                .CONTENT_ITEM_TYPE},
+          // Select only accountName addresses.
+          ContactsContract.Contacts.Data.MIMETYPE + " = ?", new String[]{ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE},
 
-                                // Show primary accountName addresses first. Note that there won't be
-                                // a primary accountName address if the user hasn't specified one.
-                                ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
+          // Show primary accountName addresses first. Note that there won't be
+          // a primary accountName address if the user hasn't specified one.
+          ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
     }
 
     @Override
@@ -284,19 +299,14 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
     }
 
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(SipgateLoginActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(SipgateLoginActivity.this, android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);
     }
 
 
     private interface ProfileQuery {
-        String[] PROJECTION = {
-                ContactsContract.CommonDataKinds.Email.ADDRESS,
-                ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
-        };
+        String[] PROJECTION = {ContactsContract.CommonDataKinds.Email.ADDRESS, ContactsContract.CommonDataKinds.Email.IS_PRIMARY,};
 
         int ADDRESS = 0;
     }
@@ -327,7 +337,7 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
                 e.printStackTrace();
             }
 
-            if(token == null) return false;
+            if (token == null) { return false; }
 
             AccountManager accountManager = AccountManager.get(SipgateLoginActivity.this); //this is Activity
             Account account = new Account(email, getString(R.string.account_type));
@@ -335,16 +345,17 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
 
             extras.putString("token", token);
             boolean success = accountManager.addAccountExplicitly(account, null, extras);
-            if(success) {
+            if (success) {
                 accountManager.setAuthToken(account, "oauth", token);
-                Log.d(TAG,"Account created");
-            } else {
-                Log.d(TAG,"Account creation failed. Look at previous logs to investigate");
+                Log.d(TAG, "Account created");
+            }
+            else {
+                Log.d(TAG, "Account creation failed. Look at previous logs to investigate");
             }
 
             ContentResolver.requestSync(account, ContactsContract.AUTHORITY, extras);
             ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true);
-            ContentResolver.addPeriodicSync(account, ContactsContract.AUTHORITY, extras, 60*60*24);
+            ContentResolver.addPeriodicSync(account, ContactsContract.AUTHORITY, extras, 60 * 60 * 24);
             ContentResolver.setIsSyncable(account, ContactsContract.AUTHORITY, 1);
 
             return true;
@@ -357,7 +368,8 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
 
             if (success) {
                 finish();
-            } else {
+            }
+            else {
                 Log.d(TAG, getString(R.string.error_incorrect_password));
             }
         }

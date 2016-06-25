@@ -39,19 +39,20 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import cc.vileda.sipgatesync.api.SipgateApi;
 import cc.vileda.sipgatesync.sipgatesync.R;
+import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
+import com.google.api.client.auth.oauth2.Credential;
+import com.wuman.android.auth.OAuthManager;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
 import static android.Manifest.permission.WRITE_CONTACTS;
@@ -63,7 +64,6 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
     private UserLoginTask mAuthTask = null;
 
     private AutoCompleteTextView mEmailView;
-    private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
 
@@ -72,15 +72,14 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sipgate_login);
 
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mEmailView = (AutoCompleteTextView) findViewById(R.id.accountName);
         populateAutoComplete();
         mayWriteContacts();
 
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        mEmailView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                if (id == R.id.accountName || id == EditorInfo.IME_NULL) {
                     attemptLogin();
                     return true;
                 }
@@ -89,7 +88,8 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
         });
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
+        assert mEmailSignInButton != null;
+        mEmailSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
@@ -106,28 +106,6 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
         }
 
         getLoaderManager().initLoader(0, null, this);
-    }
-
-    private boolean mayReadContacts() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
-        } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-        }
-        return false;
     }
 
     private boolean mayWriteContacts() {
@@ -153,27 +131,8 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
     }
 
     /**
-     * Callback received when a permissions request has been completed.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_READ_CONTACTS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                populateAutoComplete();
-            }
-        }
-        else if (requestCode == REQUEST_WRITE_CONTACTS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d(getClass().getSimpleName(), "granted write contacts");
-            }
-        }
-    }
-
-
-    /**
      * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
+     * If there are form errors (invalid accountName, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
@@ -183,29 +142,16 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
 
         // Reset errors.
         mEmailView.setError(null);
-        mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
-            cancel = true;
-        }
-
-        // Check for a valid email address.
+        // Check for a valid accountName address.
         if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
         }
@@ -215,20 +161,45 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
             // form field with an error.
             focusView.requestFocus();
         } else {
+            OAuth oAuth = OAuth.newInstance(
+                getApplicationContext(),
+                getFragmentManager(),
+                new ClientParametersAuthentication("2vqjBrGtjA", "RRHlNeDGdzGeEmFvKOwUCzwe8yXXWGVbDLQ80yV8ISj0jWIWsx"),
+                "https://api.sipgate.com/v1/authorization/oauth/authorize",
+                "https://api.sipgate.com/v1/authorization/oauth/token",
+                "http://localhost/Callback",
+                Collections.singletonList("contacts:read")
+                                           );
+
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask = new UserLoginTask(oAuth, email);
             mAuthTask.execute((Void) null);
         }
     }
 
-    private boolean isEmailValid(String email) {
-        return email.contains("@");
-    }
-
-    private boolean isPasswordValid(String password) {
-        return password.length() > 7;
+    private boolean mayReadContacts() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        }
+        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
+            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
+                    .setAction(android.R.string.ok, new View.OnClickListener() {
+                        @Override
+                        @TargetApi(Build.VERSION_CODES.M)
+                        public void onClick(View v) {
+                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
+                        }
+                    });
+        }
+        else {
+            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
+        }
+        return false;
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -259,21 +230,40 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
         }
     }
 
+    /**
+     * Callback received when a permissions request has been completed.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults
+                                          ) {
+        if (requestCode == REQUEST_READ_CONTACTS) {
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                populateAutoComplete();
+            }
+        }
+        else if (requestCode == REQUEST_WRITE_CONTACTS) {
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(getClass().getSimpleName(), "granted write contacts");
+            }
+        }
+    }
+
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         return new CursorLoader(this,
-                // Retrieve data rows for the device user's 'profile' contact.
-                Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
+                                // Retrieve data rows for the device user's 'profile' contact.
+                                Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
                         ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
 
-                // Select only email addresses.
-                ContactsContract.Contacts.Data.MIMETYPE +
+                                // Select only accountName addresses.
+                                ContactsContract.Contacts.Data.MIMETYPE +
                         " = ?", new String[]{ContactsContract.CommonDataKinds.Email
                 .CONTENT_ITEM_TYPE},
 
-                // Show primary email addresses first. Note that there won't be
-                // a primary email address if the user hasn't specified one.
-                ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
+                                // Show primary accountName addresses first. Note that there won't be
+                                // a primary accountName address if the user hasn't specified one.
+                                ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
     }
 
     @Override
@@ -314,27 +304,39 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
         private static final String TAG = "UserLoginTask";
-        private final String mEmail;
-        private final String mPassword;
+        private final OAuth oauth;
+        private final String email;
 
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
+        UserLoginTask(final OAuth oauth, final String email) {
+            this.oauth = oauth;
+            this.email = email;
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            final String token = SipgateApi.getToken(mEmail, mPassword);
+            //final String token = SipgateApi.getToken(mEmail, mPassword);
+
+            final OAuthManager.OAuthFuture<Credential> credentialOAuthFuture = oauth.authorizeExplicitly(email);
+
+            String token = null;
+            try {
+                final Credential result = credentialOAuthFuture.getResult();
+                token = result.getAccessToken();
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
 
             if(token == null) return false;
 
             AccountManager accountManager = AccountManager.get(SipgateLoginActivity.this); //this is Activity
-            Account account = new Account(mEmail, getString(R.string.account_type));
+            Account account = new Account(email, getString(R.string.account_type));
             final Bundle extras = new Bundle();
+
             extras.putString("token", token);
-            boolean success = accountManager.addAccountExplicitly(account, mPassword, extras);
+            boolean success = accountManager.addAccountExplicitly(account, null, extras);
             if(success) {
-                accountManager.setAuthToken(account, "JWT", token);
+                accountManager.setAuthToken(account, "oauth", token);
                 Log.d(TAG,"Account created");
             } else {
                 Log.d(TAG,"Account creation failed. Look at previous logs to investigate");
@@ -356,8 +358,7 @@ public class SipgateLoginActivity extends AppCompatActivity implements LoaderCal
             if (success) {
                 finish();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                Log.d(TAG, getString(R.string.error_incorrect_password));
             }
         }
 

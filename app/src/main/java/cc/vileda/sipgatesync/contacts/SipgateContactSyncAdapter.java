@@ -18,17 +18,13 @@ package cc.vileda.sipgatesync.contacts;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.content.AbstractThreadedSyncAdapter;
-import android.content.ContentProviderClient;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.SyncResult;
+import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
-
+import cc.vileda.sipgatesync.api.SipgateApi;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,8 +33,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import cc.vileda.sipgatesync.api.SipgateApi;
 
 public class SipgateContactSyncAdapter extends AbstractThreadedSyncAdapter {
     final ContentResolver mContentResolver;
@@ -57,9 +51,11 @@ public class SipgateContactSyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.d("SipgateContactSyncAdapt", "onPerformSync()");
         AccountManager accountManager = AccountManager.get(getContext());
-        final String jwt = accountManager.peekAuthToken(account, "JWT");
-        Log.d("SipgateContactSyncAdapt", jwt == null ? "NO JWT!" : jwt);
-        final JSONArray users = SipgateApi.getContacts(jwt);
+        final String oauth = accountManager.peekAuthToken(account, "oauth");
+        Log.d("SipgateContactSyncAdapt", oauth == null
+                                         ? "NO oauth!"
+                                         : "Got token");
+        final JSONArray users = SipgateApi.getContacts(oauth);
         assert users != null;
 
         Log.d("SipgateContactSyncAdapt", String.format("fetched %d contacts", users.length()));
